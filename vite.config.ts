@@ -23,7 +23,6 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, 'src'),
         },
-      },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -32,7 +31,8 @@ export default defineConfig(({ mode }) => {
           'vendor-ui': ['framer-motion', 'lucide-react', 'canvas-confetti'],
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
               }
-           }
-        }
+            }
+          }
+       }
     };
 });
