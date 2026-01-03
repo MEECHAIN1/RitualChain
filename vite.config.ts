@@ -11,18 +11,13 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'import.meta.env.VITE_API_KEY': JSON.stringify(env.API_KEY),
-      },
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-    minify: 'esbuild',
-    chunkSizeWarningLimit: 1000,
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, 'src'),
-          },
+          '@': path.resolve(__dirname, '.'),
         }
       }
-  });
+    };
+});

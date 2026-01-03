@@ -12,14 +12,13 @@ const NetworkBanner: React.FC = () => {
   
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // If the user is on the correct network, reset dismiss state and hide banner
+  // Auto-reveal if the chain changes to a wrong one after previously being correct
   useEffect(() => {
-    if (chainId === ritualChain.id) {
+    if (chainId !== ritualChain.id) {
       setIsDismissed(false);
     }
   }, [chainId]);
 
-  // If connected to RitualChain (1337) or user dismissed it, do not show
   if (chainId === ritualChain.id || isDismissed) {
     return null;
   }
@@ -27,75 +26,74 @@ const NetworkBanner: React.FC = () => {
   const handleSwitch = async () => {
     try {
         await switchChain({ chainId: ritualChain.id });
-        triggerCelebration(t("banner.connected") || "⚡ Connected to RitualChain!");
+        // The celebration will be triggered once the chainId state updates and is captured by useChainId
+        triggerCelebration("Ritual synchronization complete.", "connect");
     } catch (e) {
-        console.error("Failed to switch chain", e);
+        console.error("Failed to switch network", e);
     }
   };
 
   return (
     <div className="fixed top-0 left-0 w-full z-[100] p-4 animate-slide-down pointer-events-none">
       <div className="container mx-auto max-w-4xl pointer-events-auto">
-        <div className="bg-gradient-to-r from-red-600/90 via-meebot-highlight/90 to-red-700/90 border border-white/20 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_rgba(220,38,38,0.4)] overflow-hidden relative group">
+        <div className="bg-gradient-to-r from-red-600/90 via-meebot-highlight/90 to-red-900/90 border border-white/20 backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_rgba(220,38,38,0.5)] overflow-hidden relative group transition-all duration-500">
           
-          {/* Decorative animated highlight */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-
-          <div className="px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            
-            <div className="flex items-center gap-4">
+          {/* Animated Glow Backlight */}
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          
+          <div className="px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="flex items-center gap-5">
                 <div className="relative">
-                    <div className="absolute inset-0 bg-white blur-lg opacity-20 animate-pulse"></div>
-                    <div className="relative w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-2xl shadow-inner backdrop-blur-md">
-                        🚧
+                    <div className="absolute inset-0 bg-white blur-xl opacity-20 animate-pulse"></div>
+                    <div className="relative w-14 h-14 rounded-2xl bg-white/10 border border-white/30 flex items-center justify-center text-3xl shadow-2xl backdrop-blur-md transform -rotate-3 group-hover:rotate-0 transition-transform">
+                        🔮
                     </div>
                 </div>
-                <div className="text-center md:text-left">
-                    <h3 className="font-bold text-white text-lg tracking-wide flex items-center justify-center md:justify-start gap-2">
-                        {t("banner.wrong_network") || "Wrong Network Detected"}
-                    </h3>
-                    <p className="text-white/80 text-sm font-medium">
-                        {t("banner.wrong_desc") || "You are currently in the void. Return to RitualChain to perform rituals."}
-                    </p>
+                <div className="text-center md:text-left text-white">
+                    <h3 className="font-black text-xl tracking-tight leading-none mb-1">{t("banner.wrong_network")}</h3>
+                    <p className="text-white/70 text-sm font-medium leading-tight max-w-sm">{t("banner.wrong_desc")}</p>
                 </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-4 w-full md:w-auto">
                 <button
                   onClick={handleSwitch}
                   disabled={isPending}
-                  className="flex-1 md:flex-none px-6 py-3 bg-white text-red-600 rounded-xl font-black text-sm uppercase tracking-wider transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="relative group/btn flex-1 md:flex-none px-8 py-3 bg-white text-red-600 rounded-2xl font-black text-sm uppercase tracking-[0.1em] shadow-[0_10px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_15px_30px_rgba(255,255,255,0.4)] transition-all active:scale-95 disabled:opacity-50 overflow-hidden"
                 >
-                  {isPending ? (
-                      <>
-                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                          {t("banner.switching") || "Switching..."}
-                      </>
-                  ) : (
-                      <>
-                         ⚡ {t("banner.switch") || "Switch Network"}
-                      </>
-                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {isPending ? (
+                      <><span className="animate-spin text-lg">⏳</span> {t("banner.switching")}</>
+                    ) : (
+                      <>⚡ {t("banner.switch")}</>
+                    )}
+                  </span>
+                  <div className="absolute inset-0 bg-red-50 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                 </button>
-
+                
                 <button 
                   onClick={() => setIsDismissed(true)}
-                  className="p-3 rounded-xl bg-black/20 text-white hover:bg-black/40 transition-colors border border-white/10"
-                  aria-label="Dismiss warning"
+                  className="p-4 rounded-2xl bg-black/30 text-white/50 hover:text-white hover:bg-black/50 border border-white/5 transition-all group/close"
+                  title="Dismiss temporarily"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  <svg className="w-5 h-5 group-hover/close:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
+          </div>
+
+          {/* Bottom Shimmer Bar */}
+          <div className="absolute bottom-0 left-0 h-1 bg-white/30 w-full overflow-hidden">
+            <div className="h-full bg-white w-1/3 animate-shimmer-fast"></div>
           </div>
         </div>
       </div>
       <style>{`
-        @keyframes slide-down {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes shimmer-fast {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
         }
-        .animate-slide-down {
-            animation: slide-down 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .animate-shimmer-fast {
+            animation: shimmer-fast 2s infinite linear;
         }
       `}</style>
     </div>

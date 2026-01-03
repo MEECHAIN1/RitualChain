@@ -29,6 +29,7 @@ const App: React.FC = () => {
                     <Routes>
                       {/* Set Mining Page as Default */}
                       <Route path="/" element={<Navigate to="/mining" replace />} />
+                      
                       <Route path="/mining" element={<MiningPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
                       <Route path="/genesis" element={<GenesisPage />} />

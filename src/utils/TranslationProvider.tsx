@@ -12,15 +12,22 @@ const translations: Record<Language, Record<string, string>> = {
     "wallet.connect": "Connect Wallet",
     "wallet.disconnect": "Disconnect",
     "wallet.connecting": "Connecting...",
-    "mining.title": "Void Energy Mining",
-    "mining.desc": "Channel the chaotic energy of the void to synthesize MCB tokens.",
-    "mining.start": "Start Ritual",
+    "mining.title": "Vacuum Energy Mining",
+    "mining.desc": "Channel chaotic vacuum energy from hidden realms to synthesize MCB tokens.",
+    "mining.start": "Begin Ritual",
     "mining.stop": "Cease Channeling",
-    "mining.hashrate": "Ritual Power",
+    "mining.hashrate": "Vacuum Energy (MHz)",
+    "mining.wisdom": "Wisdom Points",
     "mining.mined": "Mined MCB",
-    "mining.status": "Status",
-    "mining.status.active": "Channeling Active",
+    "mining.status": "Ritual Status",
+    "mining.status.active": "Ritual In Progress",
     "mining.status.idle": "Altar Dormant",
+    "badge.quantum": "Quantum Initiate",
+    "badge.wisdom": "Wisdom Seeker",
+    "badge.conduit": "Ritual Conduit",
+    "badge.desc.quantum": "First successful vacuum harvest (>1 MHz)",
+    "badge.desc.wisdom": "Proven ritual mastery (>0.01 Wisdom)",
+    "badge.desc.conduit": "Node and ritual fully synced",
     "genesis.title": "Summon a MeeBot",
     "genesis.desc": "Enter a mystical theme to bring your digital familiar to life.",
     "genesis.placeholder": "e.g., Cyberpunk Monk, Neon Druid...",
@@ -46,11 +53,11 @@ const translations: Record<Language, Record<string, string>> = {
     "celebration.claim.fail": "Claim failed.",
     "dash.welcome": "Welcome, Initiate.",
     "dash.stats": "Network Statistics",
-    "banner.wrong_network": "Wrong Network Detected",
+    "banner.wrong_network": "Forbidden Portal Detected",
     "banner.wrong_desc": "You are wandering in the void. Return to RitualChain.",
-    "banner.switch": "⚡ Switch to RitualChain",
-    "banner.switching": "Switching...",
-    "banner.connected": "⚡ Connected to RitualChain!"
+    "banner.switch": "⚡ Align with RitualChain",
+    "banner.switching": "Aligning...",
+    "banner.connected": "⚡ Synchronized with RitualChain!"
   },
   th: {
     "nav.dashboard": "แดชบอร์ด",
@@ -62,15 +69,22 @@ const translations: Record<Language, Record<string, string>> = {
     "wallet.connect": "เชื่อมต่อกระเป๋า",
     "wallet.disconnect": "ตัดการเชื่อมต่อ",
     "wallet.connecting": "กำลังเชื่อมต่อ...",
-    "mining.title": "การขุดพลังงานแห่งความว่างเปล่า",
+    "mining.title": "การขุดพลังงานสุญญากาศ",
     "mining.desc": "รวบรวมพลังงานจากความโกลาหลเพื่อสังเคราะห์เหรียญ MCB",
     "mining.start": "เริ่มพิธีกรรม",
     "mining.stop": "หยุดการรวบรวม",
-    "mining.hashrate": "พลังพิธีกรรม",
+    "mining.hashrate": "พลังงานสุญญากาศ (MHz)",
+    "mining.wisdom": "จุดเชาว์ได้",
     "mining.mined": "เหรียญที่ขุดได้",
-    "mining.status": "สถานะ",
-    "mining.status.active": "กำลังรวบรวมพลัง",
+    "mining.status": "สถานะพิธีกรรม",
+    "mining.status.active": "กำลังประกอบพิธี",
     "mining.status.idle": "แท่นบูชาสงบนิ่ง",
+    "badge.quantum": "ผู้เริ่มต้นควอนตัม",
+    "badge.wisdom": "ผู้แสวงหาปัญญา",
+    "badge.conduit": "สื่อกลางพิธีกรรม",
+    "badge.desc.quantum": "เก็บเกี่ยวพลังงานสุญญากาศสำเร็จครั้งแรก (>1 MHz)",
+    "badge.desc.wisdom": "พิสูจน์ความเชี่ยวชาญในพิธีกรรม (>0.01 ปัญญา)",
+    "badge.desc.conduit": "ซิงค์โหนดและพิธีกรรมสำเร็จสมบูรณ์",
     "genesis.title": "อัญเชิญ MeeBot",
     "genesis.desc": "ใส่ธีมที่ต้องการเพื่อปลุกชีพผู้ช่วยดิจิทัลของคุณ",
     "genesis.placeholder": "เช่น นักบวชไซเบอร์, ดรูอิดแสงนีออน...",
@@ -96,18 +110,17 @@ const translations: Record<Language, Record<string, string>> = {
     "celebration.claim.fail": "การรับรางวัลล้มเหลว",
     "dash.welcome": "ยินดีต้อนรับ ผู้ศรัทธาใหม่",
     "dash.stats": "สถิติเครือข่าย",
-    "banner.wrong_network": "ตรวจพบเครือข่ายที่ไม่ถูกต้อง",
+    "banner.wrong_network": "ตรวจพบประตูมิติที่ต้องห้าม",
     "banner.wrong_desc": "คุณกำลังหลงทางในความว่างเปล่า กลับสู่ RitualChain",
-    "banner.switch": "⚡ สลับไปยัง RitualChain",
-    "banner.switching": "กำลังสลับ...",
-    "banner.connected": "⚡ เชื่อมต่อกับ RitualChain แล้ว!"
+    "banner.switch": "⚡ ปรับจูนเข้ากับ RitualChain",
+    "banner.switching": "กำลังปรับจูน...",
+    "banner.connected": "⚡ เชื่อมต่อกับ RitualChain สำเร็จ!"
   },
 };
 
 const TranslationContext = createContext<TranslationContextType | null>(null);
 
 export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize language from localStorage if available
   const [language, setLanguage] = useState<Language>(() => {
     try {
       const saved = localStorage.getItem('ritual_language');
@@ -117,7 +130,6 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   });
 
-  // Persist language changes to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('ritual_language', language);
