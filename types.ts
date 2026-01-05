@@ -1,7 +1,15 @@
 export type Language = 'en' | 'th';
 
+export interface MeeBot {
+  tokenId: string;
+  name: string;
+  description: string;
+  image: string;
+}
+
 export interface CelebrationContextType {
-  triggerCelebration: (message: string) => void;
+  triggerCelebration: (message: string, type?: 'mint' | 'stake' | 'unstake' | 'claim' | 'connect' | 'generic') => void;
+  isCelebrating: boolean;
 }
 
 export interface TranslationContextType {

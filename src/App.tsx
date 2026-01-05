@@ -6,7 +6,7 @@ import { TranslationProvider } from "./utils/TranslationProvider";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import NetworkBanner from "./components/NetworkBanner";
-import DebugOverlay from "./components/DebugOverlay";
+import DebugOverlay from "./components/DebugOverlay"; // Import Debugger
 import DashboardPage from "./pages/DashboardPage";
 import GenesisPage from "./pages/GenesisPage";
 import StakingPage from "./pages/StakingPage";
@@ -18,31 +18,35 @@ const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TranslationProvider>
-        <CelebrationProvider>
-          <HashRouter>
-            <div className="min-h-screen bg-meebot-bg text-meebot-text-primary flex flex-col font-sans selection:bg-meebot-accent selection:text-white relative overflow-x-hidden">
-              <NetworkBanner />
-              <Navbar />
-              <main className="container mx-auto px-4 py-6 flex-grow relative z-10">
-                <Routes>
-                  <Route path="/" element={<Navigate to="/mining" replace />} />
-                  <Route path="/mining" element={<MiningPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/genesis" element={<GenesisPage />} />
-                  <Route path="/staking" element={<StakingPage />} />
-                  <Route path="/gallery" element={<NFTGalleryPage />} />
-                  <Route path="/events" element={<EventLogPage />} />
-                </Routes>
-              </main>
-              <Footer />
-              <DebugOverlay className="fixed bottom-4 right-4 z-[60]" />
-            </div>
-          </HashRouter>
-        </CelebrationProvider>
-      </TranslationProvider>
-    </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+          <TranslationProvider>
+            <CelebrationProvider>
+              <HashRouter>
+                <div className="min-h-screen bg-meebot-bg text-meebot-text-primary flex flex-col font-sans selection:bg-meebot-accent selection:text-white relative">
+                  <NetworkBanner />
+                  <Navbar />
+                  <main className="container mx-auto px-4 py-6 flex-grow">
+                    <Routes>
+                      {/* Set Mining Page as Default */}
+                      <Route path="/" element={<Navigate to="/mining" replace />} />
+                      
+                      <Route path="/mining" element={<MiningPage />} />
+                      <Route path="/dashboard" element={<DashboardPage />} />
+                      <Route path="/genesis" element={<GenesisPage />} />
+                      <Route path="/staking" element={<StakingPage />} />
+                      <Route path="/gallery" element={<NFTGalleryPage />} />
+                      <Route path="/events" element={<EventLogPage />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                  
+                  {/* Global Debug Overlay: Fixed at bottom-right */}
+                  <DebugOverlay className="fixed bottom-4 right-4" />
+                </div>
+              </HashRouter>
+            </CelebrationProvider>
+          </TranslationProvider>
+      </QueryClientProvider>
   );
 };
 
