@@ -9,13 +9,17 @@ import { CONTRACT_ADDRESSES } from "../constants/addresses";
 import { getGatewayUrl, getMeeBotImageUrl } from "../utils/ipfs";
 import { MeeBot } from "../types";
 
-const StatCard: React.FC<{ label: string; value: string; icon: string }> = ({ label, value, icon }) => (
-  <div className="bg-meebot-surface border border-meebot-border p-6 rounded-2xl hover:border-meebot-accent/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,137,6,0.15)] group">
+const StatCard: React.FC<{ label: string; value: string; icon: string; highlight?: boolean }> = ({ label, value, icon, highlight }) => (
+  <div className={`bg-meebot-surface border border-meebot-border p-6 rounded-2xl transition-all duration-300 group ${
+    highlight 
+      ? 'border-meebot-highlight/30 shadow-[0_0_20px_rgba(242,95,76,0.1)]' 
+      : 'hover:border-meebot-accent/50 hover:shadow-[0_0_15px_rgba(255,137,6,0.15)]'
+  }`}>
     <div className="flex justify-between items-start mb-4">
-        <h3 className="text-meebot-text-secondary font-medium">{label}</h3>
-        <span className="text-2xl group-hover:scale-110 transition-transform">{icon}</span>
+        <h3 className="text-meebot-text-secondary font-medium text-sm tracking-wide uppercase">{label}</h3>
+        <span className="text-2xl group-hover:scale-120 group-hover:rotate-12 transition-transform duration-500">{icon}</span>
     </div>
-    <p className="text-3xl font-bold text-meebot-text-primary">{value}</p>
+    <p className="text-3xl font-bold text-meebot-text-primary font-mono tracking-tight">{value}</p>
   </div>
 );
 
@@ -48,6 +52,11 @@ const DashboardPage: React.FC = () => {
   const client = usePublicClient();
   const [ritualCount, setRitualCount] = useState<number>(0);
   const [myMeeBots, setMyMeeBots] = useState<MeeBot[]>([]);
+  
+  // Simulated Network Stats
+  const [blockHeight, setBlockHeight] = useState(12489201);
+  const [totalTxs, setTotalTxs] = useState(45293);
+  const [activeUsers, setActiveUsers] = useState(1204);
 
   const { data: tvl } = useReadContract({
     address: CONTRACT_ADDRESSES.MeeToken as `0x${string}`,
@@ -62,6 +71,15 @@ const DashboardPage: React.FC = () => {
     functionName: "totalSupply",
     args: [],
   });
+
+  useEffect(() => {
+    // Simulate live block updates
+    const interval = setInterval(() => {
+      setBlockHeight(prev => prev + 1);
+      if (Math.random() > 0.7) setTotalTxs(prev => prev + Math.floor(Math.random() * 5));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!client) return;
@@ -134,20 +152,22 @@ const DashboardPage: React.FC = () => {
   const formattedMinted = minted?.toString() || "0";
 
   return (
-    <div className="space-y-8 animate-float">
-      <header className="text-center py-10">
-        <h2 className="text-4xl md:text-5xl font-bold text-meebot-text-primary mb-4">
+    <div className="space-y-12 animate-float">
+      <header className="text-center py-10 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-meebot-accent/10 blur-[100px] rounded-full -z-10"></div>
+        <h2 className="text-4xl md:text-5xl font-bold text-meebot-text-primary mb-4 tracking-tight">
             {t("dash.welcome")}
         </h2>
-        <p className="text-meebot-text-secondary max-w-lg mx-auto">
-            Review your assets, check the network status, and prepare for your next ritual.
+        <p className="text-meebot-text-secondary max-w-lg mx-auto opacity-70">
+            Review your assets, monitor the ethereal flow, and prepare for your next ritual.
         </p>
       </header>
 
+      {/* Main Stats */}
       <div className="grid md:grid-cols-3 gap-6">
         <StatCard 
             label="Total Value Locked" 
-            value={`${Number(formattedTvl).toFixed(2)} MCB`} 
+            value={`${Number(formattedTvl).toLocaleString()} MCB`} 
             icon="💎" 
         />
         <StatCard 
@@ -162,6 +182,36 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
+      {/* Network Stats Section */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-4">
+            <h3 className="text-xl font-bold text-meebot-text-primary whitespace-nowrap">{t("dash.stats")}</h3>
+            <div className="h-px bg-meebot-border w-full"></div>
+            <span className="text-[10px] font-mono text-green-400 animate-pulse">LIVE</span>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+            <StatCard 
+                label="Total Transactions" 
+                value={totalTxs.toLocaleString()} 
+                icon="📜"
+                highlight 
+            />
+            <StatCard 
+                label="Active Users" 
+                value={activeUsers.toLocaleString()} 
+                icon="👥"
+                highlight 
+            />
+            <StatCard 
+                label="Current Block Height" 
+                value={blockHeight.toLocaleString()} 
+                icon="🧱"
+                highlight 
+            />
+        </div>
+      </section>
+
+      {/* NFT Gallery Section */}
       <div className="mt-12">
         <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-meebot-text-primary flex items-center gap-2">
@@ -179,27 +229,31 @@ const DashboardPage: React.FC = () => {
                 ))}
             </div>
         ) : (
-            <div className="bg-meebot-surface/50 border border-dashed border-meebot-border rounded-xl p-12 text-center text-meebot-text-secondary">
-                <p className="text-xl mb-4">No MeeBots found in your altar.</p>
-                <Link to="/genesis" className="text-meebot-accent hover:underline">Summon one now →</Link>
+            <div className="bg-meebot-surface/50 border border-dashed border-meebot-border rounded-xl p-12 text-center text-meebot-text-secondary group hover:border-meebot-accent/30 transition-colors">
+                <p className="text-xl mb-4 opacity-50">No MeeBots found in your altar.</p>
+                <Link to="/genesis" className="text-meebot-accent hover:text-white font-bold bg-meebot-accent/10 px-6 py-2 rounded-full border border-meebot-accent/30 hover:bg-meebot-accent transition-all">Summon one now →</Link>
             </div>
         )}
       </div>
 
+      {/* Quick Links */}
       <div className="grid md:grid-cols-3 gap-6 mt-12">
-        <Link to="/genesis" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-highlight/50 transition-all group">
+        <Link to="/genesis" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-highlight/50 transition-all group relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-meebot-highlight/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-meebot-highlight/10 transition-colors"></div>
             <h3 className="text-2xl font-bold text-meebot-highlight mb-2 flex items-center gap-2">
                 Start Genesis <span className="group-hover:translate-x-1 transition-transform">→</span>
             </h3>
             <p className="text-meebot-text-secondary">Create a new MeeBot and join the ecosystem.</p>
         </Link>
-        <Link to="/staking" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-accent/50 transition-all group">
+        <Link to="/staking" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-accent/50 transition-all group relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-meebot-accent/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-meebot-accent/10 transition-colors"></div>
             <h3 className="text-2xl font-bold text-meebot-accent mb-2 flex items-center gap-2">
                 Enter Staking <span className="group-hover:translate-x-1 transition-transform">→</span>
             </h3>
             <p className="text-meebot-text-secondary">Earn passive yield by locking your MCB tokens.</p>
         </Link>
-        <Link to="/gallery" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-text-primary/50 transition-all group">
+        <Link to="/gallery" className="bg-gradient-to-br from-meebot-surface to-meebot-bg border border-meebot-border p-8 rounded-2xl hover:border-meebot-text-primary/50 transition-all group relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-white/10 transition-colors"></div>
             <h3 className="text-2xl font-bold text-meebot-text-primary mb-2 flex items-center gap-2">
                 View Gallery <span className="group-hover:translate-x-1 transition-transform">→</span>
             </h3>
