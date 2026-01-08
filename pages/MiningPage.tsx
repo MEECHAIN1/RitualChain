@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "../utils/TranslationProvider";
 import { useCelebration } from "../context/CelebrationContext";
 import { useAccount } from "../services/mockWeb3";
+import { GoogleGenAI } from "@google/genai";
 
 const MiningPage: React.FC = () => {
   const { t } = useTranslation();
@@ -12,7 +13,7 @@ const MiningPage: React.FC = () => {
   const [minedAmount, setMinedAmount] = useState(0);
   const [hashRate, setHashRate] = useState(0);
   const [wisdomPoints, setWisdomPoints] = useState(0);
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<{ id: string; text: string; time: string }[]>([]);
   
   // Badge Tracking
   const [achievedBadges, setAchievedBadges] = useState<Set<string>>(new Set());
@@ -25,38 +26,26 @@ const MiningPage: React.FC = () => {
     }
   }, [logs]);
 
+  // Simulation Loop
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     
     if (isMining) {
       interval = setInterval(() => {
         // Random flux in Vacuum Energy (MHz)
-        const currentHash = 0.8 + Math.random() * 1.5; // Average around 1.55 MHz
+        const currentHash = 1.2 + Math.random() * 2.1; 
         setHashRate(currentHash);
         
         // Accumulate Mined tokens and Wisdom Points
-        setMinedAmount(prev => prev + 0.000042);
-        setWisdomPoints(prev => prev + 0.00002);
+        setMinedAmount(prev => prev + 0.000084);
+        setWisdomPoints(prev => prev + 0.000025);
 
-        // Badge Check: Quantum Initiate (> 2 MHz peak)
-        if (currentHash > 2.0 && !achievedBadges.has('quantum')) {
+        // Badge Checks
+        if (currentHash > 3.0 && !achievedBadges.has('quantum')) {
             setAchievedBadges(prev => new Set(prev).add('quantum'));
-            triggerCelebration("Unlocked: Quantum Initiate Badge", 'generic');
+            triggerCelebration(t("badge.quantum"), 'generic');
         }
-
-        // Generate logs randomly with mystical flavor
-        if (Math.random() > 0.7) {
-          const msgs = [
-            "Vacuum energy harvesting stabilized...",
-            "Quantum fluctuations accepted into node",
-            "Wisdom synthesized from void data",
-            "Ritual resonance frequency: " + currentHash.toFixed(2) + " MHz",
-            "Synthesizing MCB particle from chaotic energy"
-          ];
-          const msg = msgs[Math.floor(Math.random() * msgs.length)];
-          setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 30));
-        }
-      }, 500);
+      }, 1000);
     } else {
       setHashRate(0);
     }
@@ -64,51 +53,75 @@ const MiningPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [isMining, achievedBadges, t, triggerCelebration]);
 
-  // Badge Check: Wisdom Seeker (> 0.01 Wisdom)
+  // AI Log Generation
   useEffect(() => {
-      if (wisdomPoints > 0.01 && !achievedBadges.has('wisdom')) {
-          setAchievedBadges(prev => new Set(prev).add('wisdom'));
-          triggerCelebration("Unlocked: Wisdom Seeker Badge", 'generic');
-      }
-  }, [wisdomPoints, achievedBadges, t, triggerCelebration]);
+    let logInterval: ReturnType<typeof setInterval>;
+    
+    const generateAILog = async () => {
+        if (!isMining) return;
+        try {
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const prompt = "You are the RitualChain Oracle monitoring a vacuum energy mining ritual. Generate a single, short (max 12 words) log entry describing a mystical or technical ritual event. Examples: 'Quantum fluctuations stabilized in the third quadrant', 'Ancient cipher decoded in the energy stream'. Use ritualistic language. No emojis.";
+            
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: prompt,
+            });
+            
+            const logText = response.text || "Energy stream stabilized.";
+            setLogs(prev => [
+                ...prev.slice(-49),
+                { id: Math.random().toString(36), text: logText, time: new Date().toLocaleTimeString() }
+            ]);
+        } catch (e) {
+            console.error("Oracle log failed", e);
+        }
+    };
+
+    if (isMining) {
+        // Initial log
+        setLogs(prev => [...prev, { id: 'init', text: "Initializing ritual sequences...", time: new Date().toLocaleTimeString() }]);
+        logInterval = setInterval(generateAILog, 8000); // New AI log every 8s
+    }
+
+    return () => clearInterval(logInterval);
+  }, [isMining]);
 
   const toggleMining = async () => {
     if (!isConnected) {
-      triggerCelebration("⚠️ Connect your wallet to begin the ritual!");
+      triggerCelebration("Connect your soul-binding wallet first!");
       await connect();
       return;
     }
 
     if (!isMining) {
       setIsMining(true);
-      triggerCelebration("⛏️ Ritual Commenced! Vacuum Energy is flowing.");
-      setLogs(prev => [`[System] Initializing Vacuum Energy Ritual...`, ...prev]);
+      triggerCelebration("Mining Ritual Commenced!", 'stake');
     } else {
       setIsMining(false);
-      setLogs(prev => [`[System] Ritual halted. Energy dissipated.`, ...prev]);
+      triggerCelebration("Ritual Halted Safely", 'generic');
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <header className="text-center mb-12 animate-slide-in-down">
+    <div className="max-w-5xl mx-auto py-8 px-4">
+      <header className="text-center mb-12">
         <h2 className="text-4xl md:text-6xl font-black text-white mb-4 flex justify-center items-center gap-4">
           <span className={`${isMining ? "animate-spin text-meebot-accent" : "text-meebot-highlight"}`}>⛏️</span> 
           {t("mining.title")}
         </h2>
         <p className="text-meebot-text-secondary max-w-lg mx-auto font-medium italic opacity-80">
-          "{t("mining.desc")}"
+          {t("mining.desc")}
         </p>
       </header>
 
-      <div className="grid md:grid-cols-2 gap-8 items-stretch">
+      <div className="grid lg:grid-cols-2 gap-8 items-stretch">
         {/* Left: Control Panel */}
         <div className="bg-meebot-surface/50 border border-meebot-border rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-2xl backdrop-blur-xl">
-          {/* Background Aura */}
           {isMining && (
-            <div className="absolute inset-0 z-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-meebot-accent/10 to-transparent animate-pulse"></div>
-              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-br from-meebot-accent/5 to-transparent animate-pulse"></div>
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5"></div>
             </div>
           )}
 
@@ -116,7 +129,7 @@ const MiningPage: React.FC = () => {
             <div className="flex justify-between items-center mb-8">
               <span className="text-meebot-text-secondary text-xs font-black uppercase tracking-[0.3em]">{t("mining.status")}</span>
               <div className={`flex items-center gap-3 px-4 py-1.5 rounded-full text-xs font-bold border transition-all duration-500 ${isMining ? 'bg-green-500/10 text-green-400 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
-                <span className={`w-2.5 h-2.5 rounded-full ${isMining ? 'bg-green-400 animate-ping' : 'bg-red-400'}`}></span>
+                <span className={`w-2 h-2 rounded-full ${isMining ? 'bg-green-400 animate-ping' : 'bg-red-400'}`}></span>
                 {isMining ? t("mining.status.active") : t("mining.status.idle")}
               </div>
             </div>
@@ -124,7 +137,7 @@ const MiningPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-meebot-bg/50 border border-meebot-border p-6 rounded-2xl text-center">
                     <span className="block text-meebot-text-secondary mb-2 text-[10px] uppercase font-bold tracking-widest">{t("mining.hashrate")}</span>
-                    <span className={`text-3xl font-mono font-black ${isMining ? 'text-meebot-accent drop-shadow-glow' : 'text-meebot-text-secondary'}`}>
+                    <span className={`text-3xl font-mono font-black ${isMining ? 'text-meebot-accent' : 'text-meebot-text-secondary'}`}>
                         {hashRate.toFixed(2)}
                     </span>
                 </div>
@@ -136,21 +149,22 @@ const MiningPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-meebot-text-secondary text-xs uppercase font-black tracking-widest">{t("mining.mined")}</span>
-            </div>
-            <div className="bg-black/60 p-6 rounded-2xl border border-meebot-border font-mono text-3xl text-white mb-8 flex justify-between items-center group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-meebot-accent/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                <span>{minedAmount.toFixed(6)}</span>
-                <span className="text-sm text-meebot-accent font-black tracking-tighter">MCB</span>
+            <div className="bg-black/40 p-6 rounded-2xl border border-meebot-border font-mono text-3xl text-white mb-8 flex justify-between items-center group relative overflow-hidden">
+                <div className="flex flex-col">
+                    <span className="text-meebot-text-secondary text-[10px] uppercase font-bold tracking-widest mb-1">{t("mining.mined")}</span>
+                    <div className="flex items-baseline gap-2">
+                        <span>{minedAmount.toFixed(6)}</span>
+                        <span className="text-xs text-meebot-accent font-black">MCB</span>
+                    </div>
+                </div>
+                <div className="text-4xl opacity-20">🪙</div>
             </div>
             
-            {/* Badges UI */}
             <div className="flex gap-4 mb-4">
                 {['quantum', 'wisdom', 'conduit'].map(b => (
                     <div 
                         key={b} 
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all duration-500 border ${achievedBadges.has(b) ? 'bg-meebot-accent/20 border-meebot-accent shadow-[0_0_20px_rgba(255,137,6,0.3)] scale-110' : 'bg-meebot-surface border-meebot-border opacity-20 grayscale'}`}
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all duration-500 border ${achievedBadges.has(b) ? 'bg-meebot-accent/20 border-meebot-accent shadow-lg scale-110' : 'bg-meebot-surface border-meebot-border opacity-20'}`}
                         title={t(`badge.desc.${b}`)}
                     >
                         {b === 'quantum' ? '⚛️' : b === 'wisdom' ? '🧠' : '🔗'}
@@ -161,67 +175,50 @@ const MiningPage: React.FC = () => {
 
           <button
             onClick={toggleMining}
-            className={`relative z-10 w-full py-5 rounded-2xl font-black text-xl transition-all duration-300 transform active:scale-95 shadow-2xl flex items-center justify-center gap-3 overflow-hidden group/btn ${
+            className={`relative z-10 w-full py-5 rounded-2xl font-black text-xl transition-all duration-300 transform active:scale-95 shadow-2xl flex items-center justify-center gap-3 overflow-hidden group ${
               isMining 
-              ? "bg-red-600 hover:bg-red-700 text-white shadow-[0_0_30px_rgba(239,68,68,0.5)]" 
-              : "bg-meebot-accent hover:bg-meebot-highlight text-white shadow-[0_0_30px_rgba(255,137,6,0.5)]"
+              ? "bg-red-600 hover:bg-red-700 text-white" 
+              : "bg-meebot-accent hover:bg-meebot-highlight text-white"
             }`}
           >
-            <div className="absolute inset-0 bg-white/20 -translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+            <div className="absolute inset-0 bg-white/10 -translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             <span className="relative flex items-center gap-3">
-                {isMining ? (
-                  <><span className="text-2xl">🛑</span> {t("mining.stop")}</>
-                ) : (
-                  <><span className="text-2xl">⚡</span> {t("mining.start")}</>
-                )}
+                {isMining ? t("mining.stop") : t("mining.start")}
             </span>
           </button>
         </div>
 
         {/* Right: Mystical Terminal */}
-        <div className="bg-black border border-meebot-border rounded-3xl p-8 font-mono text-xs md:text-sm text-green-400 flex flex-col h-[600px] shadow-2xl relative overflow-hidden group/terminal">
+        <div className="bg-black border border-meebot-border rounded-3xl p-8 font-mono text-xs text-green-400 flex flex-col h-[500px] shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-10 bg-meebot-surface/50 border-b border-meebot-border flex items-center px-6 gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
-            <span className="ml-3 text-meebot-text-secondary text-[10px] font-black uppercase tracking-widest opacity-50">ritual_miner_v1.exe — [SESSION ACTIVE]</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+            <span className="ml-3 text-meebot-text-secondary text-[10px] font-black uppercase tracking-widest opacity-50">ritual_oracle.log</span>
           </div>
           
-          <div className="mt-10 flex-1 overflow-y-auto custom-scrollbar space-y-2 opacity-90" ref={logsRef}>
-            <div className="text-meebot-text-secondary opacity-40 mb-6 text-[10px] leading-relaxed">
-              [SYSTEM] INITIALIZING QUANTUM HARVESTER CORE...<br/>
-              [SYSTEM] ALIGNING SPECTRAL RESONANCE WITH VOID LAYER 7... OK<br/>
-              [SYSTEM] ANCIENT SCRIPTURES LOADED INTO HEURISTIC BUFFER... OK<br/>
-              [SYSTEM] READY TO SYNTHESIZE VACUUM ENERGY.
-            </div>
-            {logs.map((log, i) => (
-              <div key={i} className="animate-fade-in flex gap-3">
-                <span className="text-green-800 font-black">❯</span> 
-                <span className="flex-1">{log}</span>
+          <div className="mt-8 flex-1 overflow-y-auto custom-scrollbar space-y-3 pt-4" ref={logsRef}>
+            {logs.length === 0 && !isMining && (
+              <div className="text-meebot-text-secondary opacity-30 italic">
+                {">"} Connect to vacuum energy stream...
+              </div>
+            )}
+            {logs.map((log) => (
+              <div key={log.id} className="flex gap-4 border-b border-white/5 pb-2">
+                <span className="text-gray-600 shrink-0">[{log.time}]</span>
+                <span className="text-green-300">❯ {log.text}</span>
               </div>
             ))}
             {isMining && (
-              <div className="animate-pulse inline-block w-2 h-4 bg-green-500 ml-1"></div>
+              <div className="animate-pulse inline-block w-2 h-4 bg-green-500 ml-2"></div>
             )}
-          </div>
-
-          {/* Cyber Sigil Animation */}
-          <div className="absolute bottom-8 right-8 w-32 h-32 pointer-events-none opacity-5 transition-opacity group-hover/terminal:opacity-20 duration-1000">
-             <div className={`w-full h-full border-[8px] border-t-green-500 border-r-green-500/30 border-b-transparent border-l-transparent rounded-full ${isMining ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }}></div>
-             <div className="absolute inset-4 border-[4px] border-b-green-400 border-l-green-400/30 border-t-transparent border-r-transparent rounded-full animate-spin-reverse" style={{ animationDuration: '3s' }}></div>
           </div>
         </div>
       </div>
 
       <style>{`
-        .drop-shadow-glow { filter: drop-shadow(0 0 10px rgba(255, 137, 6, 0.5)); }
-        @keyframes spin-reverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
-        }
-        .animate-spin-reverse { animation: spin-reverse 3s linear infinite; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 197, 94, 0.2); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 197, 94, 0.2); border-radius: 2px; }
       `}</style>
     </div>
   );
