@@ -1,23 +1,25 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { defineChain } from "viem";
 
-// Define the RitualChain (MeeChain) ⚡
+// Define the local RitualChain
+// In a real environment, you can switch this to a testnet like Sepolia
 export const ritualChain = defineChain({
   id: 13390,
-  name: "RitualChain",
-  nativeCurrency: { name: "MeeBot Coin", symbol: "MCB", decimals: 18 },
+  name: "RitualChain Local",
+  nativeCurrency: { name: "MeeChain Coin", symbol: "MCB", decimals: 18 },
   rpcUrls: { 
-    default: { http: [(import.meta as any).env?.VITE_RPC_URL || "http://127.0.0.1:9545"] } 
+    // Updated port to 9545 based on latest deployment
+    default: { http: ["https://ritual-chain.rpc.replit.app"] } 
   },
   blockExplorers: {
-    default: { name: "RitualScan", url: "http://localhost:9545/explorer" }
+    default: { name: "RitualScan", url: "https://ritual-scan.replit.app" }
   }
 });
 
-// Supported chains for the Altar
 export const config = getDefaultConfig({
   appName: "RitualChain",
-  projectId: (import.meta as any).env?.WALLETCONNECT_PROJECT_ID || "c57cPRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+  // You should get a Project ID from WalletConnect Cloud
+  projectId: "c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96",
   chains: [ritualChain],
   ssr: false,
 });
