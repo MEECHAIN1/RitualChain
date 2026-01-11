@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 
 // Global state to simulate wallet connection and network state
 let globalIsConnected = false;
-let globalChainId = 1; // Default to Mainnet (Wrong network) to demonstrate the banner
+let globalChainId = 13390; // Default to Mainnet (Wrong network) to demonstrate the banner
 const accountListeners = new Set<() => void>();
 const chainListeners = new Set<() => void>();
 
