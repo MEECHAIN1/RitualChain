@@ -17,7 +17,7 @@ export const ritualChain = defineChain({
 // Supported chains for the Altar
 export const config = getDefaultConfig({
   appName: "RitualChain",
-  projectId: (import.meta as any).env?.WALLETCONNECT_PROJECT_ID || "YOUR_PROJECT_ID",
+  projectId: (import.meta as any).env?.WALLETCONNECT_PROJECT_ID || "c57cPRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
   chains: [ritualChain],
   ssr: false,
 });
