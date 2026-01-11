@@ -3,8 +3,8 @@ import { defineChain } from "viem";
 
 // Define the RitualChain (MeeChain) ⚡
 export const ritualChain = defineChain({
-  id: 1337,
-  name: "RitualChain Local",
+  id: 13390,
+  name: "RitualChain",
   nativeCurrency: { name: "MeeBot Coin", symbol: "MCB", decimals: 18 },
   rpcUrls: { 
     default: { http: [(import.meta as any).env?.VITE_RPC_URL || "http://127.0.0.1:9545"] } 
