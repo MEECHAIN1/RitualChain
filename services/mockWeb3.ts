@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 // can be demonstrated without a live Web3 provider or wallet.
 
 let globalIsConnected = false;
-let globalChainId = 1; // Start on Ethereum Mainnet by default for the "Wrong Network" demo
+let globalChainId = 13390; // Start on Ethereum Mainnet by default for the "Wrong Network" demo
 const accountListeners = new Set<() => void>();
 const chainListeners = new Set<() => void>();
 
