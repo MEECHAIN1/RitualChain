@@ -9,7 +9,7 @@ const config = {
     hardhat: {},
     ritual: {
       url: process.env.VITERPCURL || "http://127.0.0.1:8545",
-      chainId: parseInt(process.env.CHAIN_ID || "1337"),
+      chainId: parseInt(process.env.CHAIN_ID || "13390"),
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     sepolia: {
