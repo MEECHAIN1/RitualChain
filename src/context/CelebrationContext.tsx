@@ -50,7 +50,7 @@ export const CelebrationProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const getMysticalMessage = async (baseMessage: string, type: CelebrationType): Promise<string> => {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
       const prompt = `You are an ancient mystical oracle for the blockchain 'RitualChain'. 
       A significant event or achievement just occurred: "${baseMessage}" (Type: ${type}). 
       Speak as if delivering a powerful prophecy or a divine decree to a noble initiate. 
