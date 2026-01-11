@@ -5,7 +5,7 @@ import { defineChain } from "viem";
 // In a real environment, you can switch this to a testnet like Sepolia
 export const ritualChain = defineChain({
   id: 13390,
-  name: "RitualChain Local",
+  name: "RitualChain",
   nativeCurrency: { name: "MeeChain Coin", symbol: "MCB", decimals: 18 },
   rpcUrls: { 
     // Updated port to 9545 based on latest deployment
