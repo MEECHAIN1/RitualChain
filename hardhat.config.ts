@@ -13,7 +13,7 @@ const config = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
+      url: process.env.RPC_URL || "https://dimensional-newest-film.bsc.quiknode.pro/8296e7105d470d5d73b51b19556495493c8f1033",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     }
   },
